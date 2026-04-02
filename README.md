@@ -2,6 +2,8 @@
 
 Web tabanlı, gerçek zamanlı endüstriyel üretim hattı izleme sistemi (SCADA benzeri).
 
+🔗 **[Canlı Demo](https://vasis01.github.io/scada-dashboard/)**
+
 ## 🚀 Özellikler
 
 - **Gerçek Zamanlı Sensör İzleme**: Sıcaklık, basınç, hız ve titreşim sensörleri
@@ -16,7 +18,7 @@ Web tabanlı, gerçek zamanlı endüstriyel üretim hattı izleme sistemi (SCADA
 Herhangi bir kurulum gerekmez. Projeyi klonlayıp `index.html` dosyasını tarayıcınızda açmanız yeterlidir:
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/VasiS01/scada-dashboard.git
 cd scada-dashboard
 # index.html dosyasını tarayıcınızda açın
 ```
@@ -61,9 +63,6 @@ scada-dashboard/
 | Hız | 800-1800 RPM | 500-2200 RPM | <200 / >2800 RPM |
 | Titreşim | 0-4.5 mm/s | 0-7 mm/s | >11 mm/s |
 
-## 👨‍🎓 Proje Sahibi
-
-Endüstri Mühendisliği 2. Sınıf — Staj Başvuru Projesi
 
 ## 📝 Lisans
 
