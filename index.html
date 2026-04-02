@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SCADA Dashboard - Üretim Hattı İzleme ve Kontrol Paneli">
+  <title>SCADA Dashboard — Üretim Hattı İzleme Paneli</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-icon">🏭</div>
+      <div>
+        <h1>SCADA</h1>
+        <div class="subtitle">Üretim Hattı İzleme Sistemi</div>
+      </div>
+    </div>
+    <div class="topbar-center">
+      <div id="clock" class="topbar-clock">--:--:--</div>
+      <div id="date" class="topbar-date">Yükleniyor...</div>
+    </div>
+    <div class="topbar-right">
+      <div id="system-status" class="system-status">
+        <span class="status-dot"></span>
+        <span class="status-text">ÇALIŞIYOR</span>
+      </div>
+    </div>
+  </header>
+  <main class="dashboard">
+    <section class="card factory-layout">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">🏗️</span> Fabrika Yerleşimi</div>
+        <span class="card-badge badge-live"><span class="status-dot"></span> CANLI</span>
+      </div>
+      <div class="factory-svg-container">
+        <svg viewBox="0 0 600 370" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+              <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(148,163,184,0.05)" stroke-width="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="600" height="370" fill="url(#grid)"/>
+          <rect x="20" y="145" width="80" height="80" rx="8" fill="rgba(0,212,255,0.08)" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+          <text x="60" y="180" class="station-label" fill="#94a3b8" font-size="10">HAMMADDe</text>
+          <text x="60" y="200" class="station-label" fill="#64748b" font-size="9">DEPO</text>
+          <rect x="40" y="160" width="12" height="12" rx="2" fill="rgba(0,212,255,0.3)"/>
+          <rect x="55" y="160" width="12" height="12" rx="2" fill="rgba(0,212,255,0.25)"/>
+          <rect x="40" y="175" width="12" height="12" rx="2" fill="rgba(0,212,255,0.2)"/>
+          <line x1="105" y1="185" x2="155" y2="185" class="conveyor-line"/>
+          <polygon points="150,180 160,185 150,190" class="flow-arrow"/>
+          <rect id="station-1" x="160" y="130" width="120" height="110" class="station-box active"/>
+          <text x="220" y="168" class="station-label">İSTASYON 1</text>
+          <text x="220" y="185" class="station-sublabel">Isıl İşlem</text>
+          <circle cx="195" cy="210" r="12" fill="rgba(255,107,107,0.15)" stroke="rgba(255,107,107,0.4)" stroke-width="1"/>
+          <text x="195" y="214" text-anchor="middle" font-size="11">🌡️</text>
+          <text id="svg-temp-label" x="220" y="214" fill="#ff6b6b" font-size="10" font-family="Orbitron">--°C</text>
+          <line x1="285" y1="185" x2="335" y2="185" class="conveyor-line"/>
+          <polygon points="330,180 340,185 330,190" class="flow-arrow"/>
+          <rect id="station-2" x="340" y="130" width="120" height="110" class="station-box active"/>
+          <text x="400" y="168" class="station-label">İSTASYON 2</text>
+          <text x="400" y="185" class="station-sublabel">Presleme</text>
+          <circle cx="375" cy="210" r="12" fill="rgba(0,212,255,0.15)" stroke="rgba(0,212,255,0.4)" stroke-width="1"/>
+          <text x="375" y="214" text-anchor="middle" font-size="11">🔵</text>
+          <text id="svg-press-label" x="400" y="214" fill="#00d4ff" font-size="10" font-family="Orbitron">-- bar</text>
+          <line x1="400" y1="245" x2="400" y2="280" class="conveyor-line"/>
+          <polygon points="395,275 400,285 405,275" class="flow-arrow"/>
+          <rect id="station-3" x="340" y="285" width="120" height="70" class="station-box active"/>
+          <text x="400" y="315" class="station-label">İSTASYON 3</text>
+          <text x="400" y="332" class="station-sublabel">Montaj & Kalite Kontrol</text>
+          <line x1="465" y1="320" x2="520" y2="320" class="conveyor-line"/>
+          <polygon points="515,315 525,320 515,325" class="flow-arrow"/>
+          <rect x="525" y="290" width="60" height="60" rx="8" fill="rgba(0,255,136,0.08)" stroke="rgba(0,255,136,0.3)" stroke-width="1"/>
+          <text x="555" y="318" class="station-label" fill="#00ff88" font-size="10">ÇIKIŞ</text>
+          <text x="555" y="335" class="station-label" fill="#64748b" font-size="9">ÜRÜN</text>
+          <rect x="20" y="300" width="100" height="55" rx="6" fill="rgba(15,23,42,0.5)" stroke="rgba(148,163,184,0.1)" stroke-width="1"/>
+          <circle cx="35" cy="318" r="4" fill="#00ff88"/><text x="45" y="322" fill="#94a3b8" font-size="8">Aktif</text>
+          <circle cx="35" cy="333" r="4" fill="#ff9f43"/><text x="45" y="337" fill="#94a3b8" font-size="8">Uyarı</text>
+          <circle cx="35" cy="348" r="4" fill="#ff4757"/><text x="45" y="352" fill="#94a3b8" font-size="8">Kritik</text>
+          <line x1="220" y1="130" x2="220" y2="90" class="pipe-line"/>
+          <text x="225" y="85" fill="#64748b" font-size="8">Soğutma</text>
+          <line x1="400" y1="130" x2="400" y2="90" class="pipe-line"/>
+          <text x="405" y="85" fill="#64748b" font-size="8">Hidrolik</text>
+        </svg>
+      </div>
+    </section>
+    <section class="card sensors-panel">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">📡</span> Sensör Verileri</div>
+        <span class="card-badge badge-live"><span class="status-dot"></span> CANLI</span>
+      </div>
+      <div class="sensors-grid">
+        <div id="sensor-temperature-card" class="sensor-card" style="--sensor-color: #ff6b6b;">
+          <div class="sensor-header">
+            <span class="sensor-name">🌡️ Sıcaklık</span>
+            <span id="sensor-temperature-dot" class="sensor-status-dot"></span>
+          </div>
+          <div id="sensor-temperature-value" class="sensor-value">--</div>
+          <div class="sensor-unit">°C (Celsius)</div>
+          <div class="sensor-bar-container">
+            <div id="sensor-temperature-bar" class="sensor-bar" style="width: 0%"></div>
+          </div>
+          <div class="sensor-range"><span>0°C</span><span>150°C</span></div>
+        </div>
+        <div id="sensor-pressure-card" class="sensor-card" style="--sensor-color: #00d4ff;">
+          <div class="sensor-header">
+            <span class="sensor-name">🔵 Basınç</span>
+            <span id="sensor-pressure-dot" class="sensor-status-dot"></span>
+          </div>
+          <div id="sensor-pressure-value" class="sensor-value">--</div>
+          <div class="sensor-unit">bar</div>
+          <div class="sensor-bar-container">
+            <div id="sensor-pressure-bar" class="sensor-bar" style="width: 0%"></div>
+          </div>
+          <div class="sensor-range"><span>0 bar</span><span>10 bar</span></div>
+        </div>
+        <div id="sensor-speed-card" class="sensor-card" style="--sensor-color: #00ff88;">
+          <div class="sensor-header">
+            <span class="sensor-name">⚡ Hız</span>
+            <span id="sensor-speed-dot" class="sensor-status-dot"></span>
+          </div>
+          <div id="sensor-speed-value" class="sensor-value">--</div>
+          <div class="sensor-unit">RPM</div>
+          <div class="sensor-bar-container">
+            <div id="sensor-speed-bar" class="sensor-bar" style="width: 0%"></div>
+          </div>
+          <div class="sensor-range"><span>0</span><span>3000 RPM</span></div>
+        </div>
+        <div id="sensor-vibration-card" class="sensor-card" style="--sensor-color: #ff9f43;">
+          <div class="sensor-header">
+            <span class="sensor-name">📳 Titreşim</span>
+            <span id="sensor-vibration-dot" class="sensor-status-dot"></span>
+          </div>
+          <div id="sensor-vibration-value" class="sensor-value">--</div>
+          <div class="sensor-unit">mm/s</div>
+          <div class="sensor-bar-container">
+            <div id="sensor-vibration-bar" class="sensor-bar" style="width: 0%"></div>
+          </div>
+          <div class="sensor-range"><span>0</span><span>20 mm/s</span></div>
+        </div>
+      </div>
+    </section>
+    <section class="card charts-section">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">📈</span> Canlı Trend Grafikleri</div>
+        <span class="card-badge badge-live"><span class="status-dot"></span> CANLI</span>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-container">
+          <div class="chart-title">🌡️ Sıcaklık & 🔵 Basınç</div>
+          <div class="chart-wrapper">
+            <canvas id="chart-temp-pressure"></canvas>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-title">⚡ Hız & 📳 Titreşim</div>
+          <div class="chart-wrapper">
+            <canvas id="chart-speed-vibration"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="card alarms-panel">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="icon">🚨</span> Alarm Paneli
+          <span id="alarm-count" class="card-badge" style="background:var(--accent-red-dim);color:var(--accent-red);border:1px solid rgba(255,71,87,0.3);display:none;margin-left:8px;">0</span>
+        </div>
+      </div>
+      <div id="alarm-list" class="alarm-list">
+        <div class="alarm-empty">✅ Aktif alarm bulunmuyor</div>
+      </div>
+    </section>
+    <section class="card oee-panel">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">📊</span> OEE — Genel Ekipman Verimliliği</div>
+      </div>
+      <div class="oee-grid">
+        <div class="oee-gauge">
+          <div class="oee-circle-container">
+            <svg viewBox="0 0 100 100">
+              <circle class="oee-circle-bg" cx="50" cy="50" r="42"/>
+              <circle id="oee-availability-progress" class="oee-circle-progress" cx="50" cy="50" r="42" stroke="#00ff88"/>
+            </svg>
+            <div id="oee-availability-value" class="oee-circle-value">--%</div>
+          </div>
+          <div class="oee-label">Kullanılabilirlik</div>
+        </div>
+        <div class="oee-gauge">
+          <div class="oee-circle-container">
+            <svg viewBox="0 0 100 100">
+              <circle class="oee-circle-bg" cx="50" cy="50" r="42"/>
+              <circle id="oee-performance-progress" class="oee-circle-progress" cx="50" cy="50" r="42" stroke="#00d4ff"/>
+            </svg>
+            <div id="oee-performance-value" class="oee-circle-value">--%</div>
+          </div>
+          <div class="oee-label">Performans</div>
+        </div>
+        <div class="oee-gauge">
+          <div class="oee-circle-container">
+            <svg viewBox="0 0 100 100">
+              <circle class="oee-circle-bg" cx="50" cy="50" r="42"/>
+              <circle id="oee-quality-progress" class="oee-circle-progress" cx="50" cy="50" r="42" stroke="#a855f7"/>
+            </svg>
+            <div id="oee-quality-value" class="oee-circle-value">--%</div>
+          </div>
+          <div class="oee-label">Kalite</div>
+        </div>
+      </div>
+      <div class="oee-total">
+        <div>
+          <div class="oee-total-label">Toplam OEE</div>
+        </div>
+        <div style="text-align:right">
+          <div id="oee-total-value" class="oee-total-value">--%</div>
+          <div class="oee-total-target">Hedef: ≥ 85%</div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="js/sensors.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/alarms.js"></script>
+  <script src="js/oee.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
