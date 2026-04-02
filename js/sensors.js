@@ -73,7 +73,10 @@ const SensorSimulator = (() => {
       driftSpeed: 0.2,
     },
   };
+
   const sensorStates = {};
+  let paused = false;
+
   function init() {
     Object.keys(sensorConfigs).forEach((key) => {
       const config = sensorConfigs[key];
@@ -81,62 +84,86 @@ const SensorSimulator = (() => {
         currentValue: config.baseValue,
         trend: 0,
         history: [],
-        status: 'normal', 
+        status: 'normal',
       };
     });
   }
-  function gaussianRandom(mean = 0, stdev = 1) {
+
+  function gaussianRandom(mean, stdev) {
+    mean = mean || 0;
+    stdev = stdev || 1;
     const u = 1 - Math.random();
     const v = Math.random();
     const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
     return z * stdev + mean;
   }
+
+  function setPaused(val) {
+    paused = val;
+  }
+
+  function isPaused() {
+    return paused;
+  }
+
   function update() {
     const results = {};
     Object.keys(sensorConfigs).forEach((key) => {
       const config = sensorConfigs[key];
       const state = sensorStates[key];
-      state.trend += gaussianRandom(0, config.driftSpeed * 0.3);
-      state.trend = Math.max(-config.driftSpeed * 2, Math.min(config.driftSpeed * 2, state.trend));
-      const noise = gaussianRandom(0, config.noiseLevel);
-      let newValue = state.currentValue + state.trend + noise;
-      const pullForce = (config.baseValue - newValue) * 0.02;
-      newValue += pullForce;
-      if (Math.random() < 0.02) {
-        const spike = gaussianRandom(0, config.noiseLevel * 5);
-        newValue += spike;
+
+      if (!paused) {
+        state.trend += gaussianRandom(0, config.driftSpeed * 0.3);
+        state.trend = Math.max(-config.driftSpeed * 2, Math.min(config.driftSpeed * 2, state.trend));
+        const noise = gaussianRandom(0, config.noiseLevel);
+        let newValue = state.currentValue + state.trend + noise;
+        const pullForce = (config.baseValue - newValue) * 0.02;
+        newValue += pullForce;
+
+        if (Math.random() < 0.02) {
+          const spike = gaussianRandom(0, config.noiseLevel * 5);
+          newValue += spike;
+        }
+
+        newValue = Math.max(config.min, Math.min(config.max, newValue));
+        state.currentValue = newValue;
       }
-      newValue = Math.max(config.min, Math.min(config.max, newValue));
+
       let status = 'normal';
-      if (newValue < config.criticalMin || newValue > config.criticalMax) {
+      const val = state.currentValue;
+      if (val < config.criticalMin || val > config.criticalMax) {
         status = 'critical';
-      } else if (newValue < config.warningMin || newValue > config.warningMax) {
+      } else if (val < config.warningMin || val > config.warningMax) {
         status = 'warning';
       }
+
       state.history.push({
-        value: newValue,
+        value: state.currentValue,
         time: new Date(),
         status: status,
       });
+
       if (state.history.length > 60) {
         state.history.shift();
       }
+
       const previousStatus = state.status;
-      state.currentValue = newValue;
       state.status = status;
+
       results[key] = {
         config: config,
-        value: newValue,
-        displayValue: formatValue(newValue, key),
+        value: state.currentValue,
+        displayValue: formatValue(state.currentValue, key),
         status: status,
         previousStatus: previousStatus,
         statusChanged: previousStatus !== status,
-        percentage: ((newValue - config.min) / (config.max - config.min)) * 100,
+        percentage: ((state.currentValue - config.min) / (config.max - config.min)) * 100,
         history: state.history,
       };
     });
     return results;
   }
+
   function formatValue(value, sensorKey) {
     switch (sensorKey) {
       case 'temperature':
@@ -151,6 +178,16 @@ const SensorSimulator = (() => {
         return value.toFixed(1);
     }
   }
+
+  function updateThresholds(sensorKey, thresholds) {
+    const config = sensorConfigs[sensorKey];
+    if (!config) return;
+    if (thresholds.warningMin !== undefined) config.warningMin = parseFloat(thresholds.warningMin);
+    if (thresholds.warningMax !== undefined) config.warningMax = parseFloat(thresholds.warningMax);
+    if (thresholds.criticalMin !== undefined) config.criticalMin = parseFloat(thresholds.criticalMin);
+    if (thresholds.criticalMax !== undefined) config.criticalMax = parseFloat(thresholds.criticalMax);
+  }
+
   function getSensor(key) {
     const config = sensorConfigs[key];
     const state = sensorStates[key];
@@ -163,13 +200,18 @@ const SensorSimulator = (() => {
       history: state.history,
     };
   }
+
   function getConfigs() {
     return { ...sensorConfigs };
   }
+
   return {
     init,
     update,
     getSensor,
     getConfigs,
+    updateThresholds,
+    setPaused,
+    isPaused,
   };
 })();

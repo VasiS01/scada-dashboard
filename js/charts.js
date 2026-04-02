@@ -1,265 +1,173 @@
 const ChartManager = (() => {
-  let tempPressureChart = null;
-  let speedVibrationChart = null;
+  let charts = {};
   const MAX_POINTS = 30;
-  const commonOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {
-      duration: 400,
-      easing: 'easeInOutQuart',
-    },
-    interaction: {
-      mode: 'index',
-      intersect: false,
-    },
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          color: '#94a3b8',
-          font: {
-            family: "'Rajdhani', sans-serif",
-            size: 12,
-            weight: '600',
-          },
-          padding: 16,
-          usePointStyle: true,
-          pointStyleWidth: 12,
-        },
-      },
-      tooltip: {
-        backgroundColor: 'rgba(17, 24, 39, 0.95)',
-        titleFont: {
-          family: "'Rajdhani', sans-serif",
-          size: 13,
-        },
-        bodyFont: {
-          family: "'Inter', sans-serif",
-          size: 12,
-        },
-        borderColor: 'rgba(148, 163, 184, 0.2)',
-        borderWidth: 1,
-        padding: 12,
-        cornerRadius: 8,
-      },
-    },
-    scales: {
-      x: {
-        grid: {
-          color: 'rgba(148, 163, 184, 0.06)',
-          drawBorder: false,
-        },
-        ticks: {
-          color: '#64748b',
-          font: {
-            family: "'Rajdhani', sans-serif",
-            size: 11,
-          },
-          maxTicksLimit: 8,
-        },
-        border: {
-          display: false,
-        },
-      },
-      y: {
-        grid: {
-          color: 'rgba(148, 163, 184, 0.06)',
-          drawBorder: false,
-        },
-        ticks: {
-          color: '#64748b',
-          font: {
-            family: "'Rajdhani', sans-serif",
-            size: 11,
-          },
-        },
-        border: {
-          display: false,
-        },
-      },
-    },
+
+  const chartConfigs = {
+    temperature: { color: '#ff6b6b', label: 'Sıcaklık (°C)', unit: '°C', min: 0, max: 150 },
+    pressure: { color: '#00d4ff', label: 'Basınç (bar)', unit: 'bar', min: 0, max: 10 },
+    speed: { color: '#00ff88', label: 'Hız (RPM)', unit: 'RPM', min: 0, max: 3000 },
+    vibration: { color: '#ff9f43', label: 'Titreşim (mm/s)', unit: 'mm/s', min: 0, max: 20 }
   };
-  function createGradient(ctx, color, height) {
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, color.replace(')', ', 0.3)').replace('rgb', 'rgba'));
-    gradient.addColorStop(1, color.replace(')', ', 0.0)').replace('rgb', 'rgba'));
-    return gradient;
+
+  function createChartOptions(config) {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 400, easing: 'easeInOutQuart' },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(17, 24, 39, 0.95)',
+          titleFont: { family: "'Rajdhani', sans-serif", size: 13 },
+          bodyFont: { family: "'Inter', sans-serif", size: 12 },
+          borderColor: 'rgba(148, 163, 184, 0.2)',
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 8,
+          callbacks: {
+            label: function(context) {
+              let val = context.parsed.y;
+              if (val !== null && val !== undefined) {
+                return config.label + ': ' + val.toFixed(2) + ' ' + config.unit;
+              }
+              return '';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(148, 163, 184, 0.06)', drawBorder: false },
+          ticks: {
+            color: '#64748b',
+            font: { family: "'Rajdhani', sans-serif", size: 11 },
+            maxTicksLimit: 8
+          },
+          border: { display: false }
+        },
+        y: {
+          grid: { color: 'rgba(148, 163, 184, 0.06)', drawBorder: false },
+          ticks: {
+            color: '#64748b',
+            font: { family: "'Rajdhani', sans-serif", size: 11 },
+            callback: function(value) {
+              return value + ' ' + config.unit;
+            }
+          },
+          border: { display: false },
+          min: config.min,
+          max: config.max,
+          title: {
+            display: true,
+            text: config.unit,
+            color: config.color,
+            font: { family: "'Rajdhani', sans-serif", size: 12, weight: '600' }
+          }
+        }
+      }
+    };
   }
+
   function timeLabel(date) {
-    return date.toLocaleTimeString('tr-TR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+    return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
+  function init() {
+    Object.keys(chartConfigs).forEach(key => {
+      const config = chartConfigs[key];
+      const canvas = document.getElementById('chart-' + key);
+      if (!canvas) return;
+
+      charts[key] = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: config.label,
+            data: [],
+            borderColor: config.color,
+            backgroundColor: config.color.replace(')', ', 0.1)').replace('rgb', 'rgba').replace('#', ''),
+            borderWidth: 2,
+            pointRadius: 2,
+            pointHoverRadius: 6,
+            pointBackgroundColor: config.color,
+            pointHoverBackgroundColor: config.color,
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: createChartOptions(config)
+      });
+    });
+
+    fixChartBackgrounds();
+  }
+
+  function fixChartBackgrounds() {
+    Object.keys(charts).forEach(key => {
+      const config = chartConfigs[key];
+      const chart = charts[key];
+      if (!chart || !chart.ctx) return;
+
+      const gradient = chart.ctx.createLinearGradient(0, 0, 0, chart.height || 200);
+      const rgb = hexToRgb(config.color);
+      if (rgb) {
+        gradient.addColorStop(0, 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ', 0.25)');
+        gradient.addColorStop(1, 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ', 0.02)');
+        chart.data.datasets[0].backgroundColor = gradient;
+        chart.update('none');
+      }
     });
   }
-  function init() {
-    const ctx1 = document.getElementById('chart-temp-pressure');
-    if (ctx1) {
-      tempPressureChart = new Chart(ctx1, {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: [
-            {
-              label: 'Sıcaklık (°C)',
-              data: [],
-              borderColor: '#ff6b6b',
-              backgroundColor: 'rgba(255, 107, 107, 0.1)',
-              borderWidth: 2,
-              pointRadius: 0,
-              pointHoverRadius: 5,
-              pointHoverBackgroundColor: '#ff6b6b',
-              tension: 0.3,
-              fill: true,
-            },
-            {
-              label: 'Basınç (bar)',
-              data: [],
-              borderColor: '#00d4ff',
-              backgroundColor: 'rgba(0, 212, 255, 0.1)',
-              borderWidth: 2,
-              pointRadius: 0,
-              pointHoverRadius: 5,
-              pointHoverBackgroundColor: '#00d4ff',
-              tension: 0.3,
-              fill: true,
-              yAxisID: 'y1',
-            },
-          ],
-        },
-        options: {
-          ...commonOptions,
-          scales: {
-            ...commonOptions.scales,
-            y: {
-              ...commonOptions.scales.y,
-              position: 'left',
-              title: {
-                display: true,
-                text: '°C',
-                color: '#ff6b6b',
-                font: { family: "'Rajdhani', sans-serif", size: 12, weight: '600' },
-              },
-              min: 0,
-              max: 150,
-            },
-            y1: {
-              ...commonOptions.scales.y,
-              position: 'right',
-              title: {
-                display: true,
-                text: 'bar',
-                color: '#00d4ff',
-                font: { family: "'Rajdhani', sans-serif", size: 12, weight: '600' },
-              },
-              min: 0,
-              max: 10,
-              grid: {
-                drawOnChartArea: false,
-              },
-            },
-          },
-        },
-      });
+
+  function hexToRgb(hex) {
+    if (hex.startsWith('#')) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null;
     }
-    const ctx2 = document.getElementById('chart-speed-vibration');
-    if (ctx2) {
-      speedVibrationChart = new Chart(ctx2, {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: [
-            {
-              label: 'Hız (RPM)',
-              data: [],
-              borderColor: '#00ff88',
-              backgroundColor: 'rgba(0, 255, 136, 0.1)',
-              borderWidth: 2,
-              pointRadius: 0,
-              pointHoverRadius: 5,
-              pointHoverBackgroundColor: '#00ff88',
-              tension: 0.3,
-              fill: true,
-            },
-            {
-              label: 'Titreşim (mm/s)',
-              data: [],
-              borderColor: '#ff9f43',
-              backgroundColor: 'rgba(255, 159, 67, 0.1)',
-              borderWidth: 2,
-              pointRadius: 0,
-              pointHoverRadius: 5,
-              pointHoverBackgroundColor: '#ff9f43',
-              tension: 0.3,
-              fill: true,
-              yAxisID: 'y1',
-            },
-          ],
-        },
-        options: {
-          ...commonOptions,
-          scales: {
-            ...commonOptions.scales,
-            y: {
-              ...commonOptions.scales.y,
-              position: 'left',
-              title: {
-                display: true,
-                text: 'RPM',
-                color: '#00ff88',
-                font: { family: "'Rajdhani', sans-serif", size: 12, weight: '600' },
-              },
-              min: 0,
-              max: 3000,
-            },
-            y1: {
-              ...commonOptions.scales.y,
-              position: 'right',
-              title: {
-                display: true,
-                text: 'mm/s',
-                color: '#ff9f43',
-                font: { family: "'Rajdhani', sans-serif", size: 12, weight: '600' },
-              },
-              min: 0,
-              max: 20,
-              grid: {
-                drawOnChartArea: false,
-              },
-            },
-          },
-        },
-      });
-    }
+    return null;
   }
+
   function update(sensorData) {
     const now = timeLabel(new Date());
-    if (tempPressureChart) {
-      tempPressureChart.data.labels.push(now);
-      tempPressureChart.data.datasets[0].data.push(sensorData.temperature.value);
-      tempPressureChart.data.datasets[1].data.push(sensorData.pressure.value);
-      if (tempPressureChart.data.labels.length > MAX_POINTS) {
-        tempPressureChart.data.labels.shift();
-        tempPressureChart.data.datasets[0].data.shift();
-        tempPressureChart.data.datasets[1].data.shift();
+
+    Object.keys(charts).forEach(key => {
+      const chart = charts[key];
+      if (!chart || !sensorData[key]) return;
+
+      const value = parseFloat(sensorData[key].value);
+      if (isNaN(value)) return;
+
+      chart.data.labels.push(now);
+      chart.data.datasets[0].data.push(value);
+
+      if (chart.data.labels.length > MAX_POINTS) {
+        chart.data.labels.shift();
+        chart.data.datasets[0].data.shift();
       }
-      tempPressureChart.update('none');
-    }
-    if (speedVibrationChart) {
-      speedVibrationChart.data.labels.push(now);
-      speedVibrationChart.data.datasets[0].data.push(sensorData.speed.value);
-      speedVibrationChart.data.datasets[1].data.push(sensorData.vibration.value);
-      if (speedVibrationChart.data.labels.length > MAX_POINTS) {
-        speedVibrationChart.data.labels.shift();
-        speedVibrationChart.data.datasets[0].data.shift();
-        speedVibrationChart.data.datasets[1].data.shift();
-      }
-      speedVibrationChart.update('none');
-    }
+
+      chart.update('none');
+    });
   }
-  return {
-    init,
-    update,
-  };
+
+  function getChartData() {
+    const result = {};
+    Object.keys(charts).forEach(key => {
+      const chart = charts[key];
+      if (chart) {
+        result[key] = {
+          labels: [...chart.data.labels],
+          values: [...chart.data.datasets[0].data]
+        };
+      }
+    });
+    return result;
+  }
+
+  return { init, update, getChartData };
 })();

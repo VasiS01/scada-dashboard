@@ -18,10 +18,19 @@
       </div>
     </div>
     <div class="topbar-center">
+      <div id="shift-indicator" class="shift-indicator">
+        <span class="shift-icon">🔄</span>
+        <span id="shift-text" class="shift-text">--</span>
+      </div>
       <div id="clock" class="topbar-clock">--:--:--</div>
       <div id="date" class="topbar-date">Yükleniyor...</div>
     </div>
     <div class="topbar-right">
+      <div class="control-buttons">
+        <button id="btn-start" class="ctrl-btn ctrl-start" title="Hattı Başlat">▶ BAŞLAT</button>
+        <button id="btn-stop" class="ctrl-btn ctrl-stop" title="Hattı Durdur">⏸ DURDUR</button>
+        <button id="btn-emergency" class="ctrl-btn ctrl-emergency" title="Acil Durdurma">⚠ ACİL STOP</button>
+      </div>
       <div id="system-status" class="system-status">
         <span class="status-dot"></span>
         <span class="status-text">ÇALIŞIYOR</span>
@@ -43,7 +52,7 @@
           </defs>
           <rect width="600" height="370" fill="url(#grid)"/>
           <rect x="20" y="145" width="80" height="80" rx="8" fill="rgba(0,212,255,0.08)" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
-          <text x="60" y="180" class="station-label" fill="#94a3b8" font-size="10">HAMMADDe</text>
+          <text x="60" y="180" class="station-label" fill="#94a3b8" font-size="10">HAMMADDE</text>
           <text x="60" y="200" class="station-label" fill="#64748b" font-size="9">DEPO</text>
           <rect x="40" y="160" width="12" height="12" rx="2" fill="rgba(0,212,255,0.3)"/>
           <rect x="55" y="160" width="12" height="12" rx="2" fill="rgba(0,212,255,0.25)"/>
@@ -68,7 +77,7 @@
           <polygon points="395,275 400,285 405,275" class="flow-arrow"/>
           <rect id="station-3" x="340" y="285" width="120" height="70" class="station-box active"/>
           <text x="400" y="315" class="station-label">İSTASYON 3</text>
-          <text x="400" y="332" class="station-sublabel">Montaj & Kalite Kontrol</text>
+          <text x="400" y="332" class="station-sublabel">Montaj &amp; Kalite Kontrol</text>
           <line x1="465" y1="320" x2="520" y2="320" class="conveyor-line"/>
           <polygon points="515,315 525,320 515,325" class="flow-arrow"/>
           <rect x="525" y="290" width="60" height="60" rx="8" fill="rgba(0,255,136,0.08)" stroke="rgba(0,255,136,0.3)" stroke-width="1"/>
@@ -88,7 +97,10 @@
     <section class="card sensors-panel">
       <div class="card-header">
         <div class="card-title"><span class="icon">📡</span> Sensör Verileri</div>
-        <span class="card-badge badge-live"><span class="status-dot"></span> CANLI</span>
+        <div class="card-header-actions">
+          <button id="btn-settings" class="icon-btn" title="Eşik Ayarları">⚙️</button>
+          <span class="card-badge badge-live"><span class="status-dot"></span> CANLI</span>
+        </div>
       </div>
       <div class="sensors-grid">
         <div id="sensor-temperature-card" class="sensor-card" style="--sensor-color: #ff6b6b;">
@@ -141,6 +153,42 @@
         </div>
       </div>
     </section>
+    <section class="card production-panel">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">📦</span> Üretim Sayacı</div>
+        <button id="btn-export-csv" class="export-btn" title="CSV Olarak İndir">📥 CSV İndir</button>
+      </div>
+      <div class="production-grid">
+        <div class="production-stat">
+          <div class="production-stat-icon" style="background: var(--accent-blue-dim); color: var(--accent-blue);">📦</div>
+          <div class="production-stat-info">
+            <div class="production-stat-label">Toplam Üretim</div>
+            <div id="prod-total" class="production-stat-value">0</div>
+          </div>
+        </div>
+        <div class="production-stat">
+          <div class="production-stat-icon" style="background: var(--accent-green-dim); color: var(--accent-green);">✅</div>
+          <div class="production-stat-info">
+            <div class="production-stat-label">Sağlam Parça</div>
+            <div id="prod-good" class="production-stat-value" style="color: var(--accent-green);">0</div>
+          </div>
+        </div>
+        <div class="production-stat">
+          <div class="production-stat-icon" style="background: var(--accent-red-dim); color: var(--accent-red);">❌</div>
+          <div class="production-stat-info">
+            <div class="production-stat-label">Hatalı Parça</div>
+            <div id="prod-defect" class="production-stat-value" style="color: var(--accent-red);">0</div>
+          </div>
+        </div>
+        <div class="production-stat">
+          <div class="production-stat-icon" style="background: var(--accent-orange-dim); color: var(--accent-orange);">📊</div>
+          <div class="production-stat-info">
+            <div class="production-stat-label">Fire Oranı</div>
+            <div id="prod-waste" class="production-stat-value" style="color: var(--accent-green);">0.0%</div>
+          </div>
+        </div>
+      </div>
+    </section>
     <section class="card charts-section">
       <div class="card-header">
         <div class="card-title"><span class="icon">📈</span> Canlı Trend Grafikleri</div>
@@ -148,15 +196,27 @@
       </div>
       <div class="charts-grid">
         <div class="chart-container">
-          <div class="chart-title">🌡️ Sıcaklık & 🔵 Basınç</div>
+          <div class="chart-title">🌡️ Sıcaklık (°C)</div>
           <div class="chart-wrapper">
-            <canvas id="chart-temp-pressure"></canvas>
+            <canvas id="chart-temperature"></canvas>
           </div>
         </div>
         <div class="chart-container">
-          <div class="chart-title">⚡ Hız & 📳 Titreşim</div>
+          <div class="chart-title">🔵 Basınç (bar)</div>
           <div class="chart-wrapper">
-            <canvas id="chart-speed-vibration"></canvas>
+            <canvas id="chart-pressure"></canvas>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-title">⚡ Hız (RPM)</div>
+          <div class="chart-wrapper">
+            <canvas id="chart-speed"></canvas>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-title">📳 Titreşim (mm/s)</div>
+          <div class="chart-wrapper">
+            <canvas id="chart-vibration"></canvas>
           </div>
         </div>
       </div>
@@ -166,6 +226,12 @@
         <div class="card-title">
           <span class="icon">🚨</span> Alarm Paneli
           <span id="alarm-count" class="card-badge" style="background:var(--accent-red-dim);color:var(--accent-red);border:1px solid rgba(255,71,87,0.3);display:none;margin-left:8px;">0</span>
+        </div>
+        <div class="alarm-filters">
+          <button class="filter-btn active" data-filter="all">Tümü</button>
+          <button class="filter-btn" data-filter="critical">Kritik</button>
+          <button class="filter-btn" data-filter="warning">Uyarı</button>
+          <button class="filter-btn" data-filter="info">Bilgi</button>
         </div>
       </div>
       <div id="alarm-list" class="alarm-list">
@@ -219,10 +285,87 @@
       </div>
     </section>
   </main>
+
+  <div id="settings-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>⚙️ Sensör Eşik Ayarları</h2>
+        <button id="modal-close" class="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-group">
+          <h3>🌡️ Sıcaklık (°C)</h3>
+          <div class="setting-row">
+            <label>Uyarı Alt / Üst:</label>
+            <input type="number" id="set-temperature-warningMin" class="setting-input" step="1">
+            <span>—</span>
+            <input type="number" id="set-temperature-warningMax" class="setting-input" step="1">
+          </div>
+          <div class="setting-row">
+            <label>Kritik Alt / Üst:</label>
+            <input type="number" id="set-temperature-criticalMin" class="setting-input" step="1">
+            <span>—</span>
+            <input type="number" id="set-temperature-criticalMax" class="setting-input" step="1">
+          </div>
+        </div>
+        <div class="setting-group">
+          <h3>🔵 Basınç (bar)</h3>
+          <div class="setting-row">
+            <label>Uyarı Alt / Üst:</label>
+            <input type="number" id="set-pressure-warningMin" class="setting-input" step="0.1">
+            <span>—</span>
+            <input type="number" id="set-pressure-warningMax" class="setting-input" step="0.1">
+          </div>
+          <div class="setting-row">
+            <label>Kritik Alt / Üst:</label>
+            <input type="number" id="set-pressure-criticalMin" class="setting-input" step="0.1">
+            <span>—</span>
+            <input type="number" id="set-pressure-criticalMax" class="setting-input" step="0.1">
+          </div>
+        </div>
+        <div class="setting-group">
+          <h3>⚡ Hız (RPM)</h3>
+          <div class="setting-row">
+            <label>Uyarı Alt / Üst:</label>
+            <input type="number" id="set-speed-warningMin" class="setting-input" step="10">
+            <span>—</span>
+            <input type="number" id="set-speed-warningMax" class="setting-input" step="10">
+          </div>
+          <div class="setting-row">
+            <label>Kritik Alt / Üst:</label>
+            <input type="number" id="set-speed-criticalMin" class="setting-input" step="10">
+            <span>—</span>
+            <input type="number" id="set-speed-criticalMax" class="setting-input" step="10">
+          </div>
+        </div>
+        <div class="setting-group">
+          <h3>📳 Titreşim (mm/s)</h3>
+          <div class="setting-row">
+            <label>Uyarı Alt / Üst:</label>
+            <input type="number" id="set-vibration-warningMin" class="setting-input" step="0.1">
+            <span>—</span>
+            <input type="number" id="set-vibration-warningMax" class="setting-input" step="0.1">
+          </div>
+          <div class="setting-row">
+            <label>Kritik Alt / Üst:</label>
+            <input type="number" id="set-vibration-criticalMin" class="setting-input" step="0.1">
+            <span>—</span>
+            <input type="number" id="set-vibration-criticalMax" class="setting-input" step="0.1">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-save-settings" class="ctrl-btn ctrl-start">💾 Kaydet</button>
+        <button id="btn-cancel-settings" class="ctrl-btn ctrl-stop">İptal</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/sensors.js"></script>
   <script src="js/charts.js"></script>
   <script src="js/alarms.js"></script>
   <script src="js/oee.js"></script>
+  <script src="js/production.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
