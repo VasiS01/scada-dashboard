@@ -284,6 +284,120 @@
         </div>
       </div>
     </section>
+
+    <section class="tech-section dashboard-grid">
+      <div class="card pid-panel">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">🎛️</span>
+            Sıcaklık PID Kontrolcü
+          </div>
+          <span class="card-badge badge-live">OTO DÖNGÜ</span>
+        </div>
+        <div class="pid-container">
+           <div class="pid-status stable" id="pid-status">BEKLENİYOR</div>
+           <div class="pid-grid">
+              <div class="pid-val-box">
+                <div class="pid-lbl">PROSES (PV)</div>
+                <div class="pid-val" id="pid-pv-display">--</div>
+              </div>
+              <div class="pid-val-box">
+                <div class="pid-lbl">SET (SP)</div>
+                <div class="pid-val" id="pid-setpoint-display">--</div>
+              </div>
+              <div class="pid-val-box">
+                <div class="pid-lbl">HATA (e)</div>
+                <div class="pid-val" id="pid-error-display">--</div>
+              </div>
+              <div class="pid-val-box">
+                <div class="pid-lbl">ÇIKIŞ (OUT)</div>
+                <div class="pid-val" id="pid-output-display">--</div>
+              </div>
+           </div>
+           <div class="pid-terms">
+             <span>P: <span id="pid-p-term">0.00</span></span>
+             <span>I: <span id="pid-i-term">0.00</span></span>
+             <span>D: <span id="pid-d-term">0.00</span></span>
+           </div>
+           <div class="sensor-bar-container" style="height: 10px; margin-bottom: 20px;">
+             <div class="sensor-bar" id="pid-output-bar" style="width: 0%;"></div>
+           </div>
+           <div id="pid-params" class="pid-params-grid"></div>
+        </div>
+      </div>
+
+      <div class="card spc-panel">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">📊</span>
+            Özet İstatistiksel Proses Kontrol (SPC)
+          </div>
+        </div>
+        <div class="spc-table-container">
+          <table class="spc-table">
+            <thead>
+              <tr>
+                <th>Sensör</th>
+                <th>Min</th>
+                <th>Max</th>
+                <th>X̄ (Ort)</th>
+                <th>σ (Std.Sapma)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Sıcaklık (°C)</td>
+                <td id="stat-temperature-min">--</td>
+                <td id="stat-temperature-max">--</td>
+                <td id="stat-temperature-avg">--</td>
+                <td id="stat-temperature-std">--</td>
+              </tr>
+              <tr>
+                <td>Basınç (bar)</td>
+                <td id="stat-pressure-min">--</td>
+                <td id="stat-pressure-max">--</td>
+                <td id="stat-pressure-avg">--</td>
+                <td id="stat-pressure-std">--</td>
+              </tr>
+              <tr>
+                <td>Hız (RPM)</td>
+                <td id="stat-speed-min">--</td>
+                <td id="stat-speed-max">--</td>
+                <td id="stat-speed-avg">--</td>
+                <td id="stat-speed-std">--</td>
+              </tr>
+              <tr>
+                <td>Titreşim (mm/s)</td>
+                <td id="stat-vibration-min">--</td>
+                <td id="stat-vibration-max">--</td>
+                <td id="stat-vibration-avg">--</td>
+                <td id="stat-vibration-std">--</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card interlock-panel">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">🛡️</span>
+            Güvenlik Interlock Sistemleri
+          </div>
+        </div>
+        <div id="interlock-list" class="interlock-list"></div>
+      </div>
+
+      <div class="card comm-panel">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">📡</span>
+            Haberleşme: Modbus TCP & OPC UA
+          </div>
+        </div>
+        <div id="comm-status-list" class="comm-list"></div>
+      </div>
+    </section>
   </main>
 
   <div id="settings-modal" class="modal-overlay" style="display:none;">
@@ -366,6 +480,9 @@
   <script src="js/alarms.js"></script>
   <script src="js/oee.js"></script>
   <script src="js/production.js"></script>
+  <script src="js/pid.js"></script>
+  <script src="js/interlock.js"></script>
+  <script src="js/comm.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

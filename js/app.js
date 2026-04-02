@@ -10,6 +10,9 @@ const App = (() => {
     AlarmManager.init();
     OEEManager.init();
     ProductionManager.init();
+    PIDController.init();
+    InterlockManager.init();
+    CommSimulator.init();
     startClock();
     updateShift();
     startSimulation();
@@ -57,17 +60,55 @@ const App = (() => {
   function startSimulation() {
     function tick() {
       if (!isRunning || isEmergency) return;
+
       const sensorData = SensorSimulator.update();
+
       Object.keys(sensorData).forEach(key => updateSensorCard(key, sensorData[key]));
+
       ChartManager.update(sensorData);
+
       Object.keys(sensorData).forEach(key => AlarmManager.checkSensor(key, sensorData[key]));
+
       OEEManager.update(sensorData);
       ProductionManager.update(sensorData);
+
+      if (sensorData.temperature) {
+        PIDController.compute('temperature', sensorData.temperature.value, UPDATE_RATE / 1000);
+      }
+
+      const interlockActions = InterlockManager.evaluate(sensorData);
+      interlockActions.forEach(action => {
+        if (action.action === 'stop_line' || action.action === 'emergency_brake') {
+          isRunning = false;
+          SensorSimulator.setPaused(true);
+          updateControlState();
+        }
+      });
+
+      CommSimulator.update(sensorData);
+
       updateStations(sensorData);
       updateSystemStatus(sensorData);
+      updateStatsDisplay(sensorData);
     }
     tick();
     updateInterval = setInterval(tick, UPDATE_RATE);
+  }
+
+  function updateStatsDisplay() {
+    const sensors = ['temperature', 'pressure', 'speed', 'vibration'];
+    sensors.forEach(key => {
+      const stats = SensorSimulator.getStatistics(key);
+      const minEl = document.getElementById('stat-' + key + '-min');
+      const maxEl = document.getElementById('stat-' + key + '-max');
+      const avgEl = document.getElementById('stat-' + key + '-avg');
+      const stdEl = document.getElementById('stat-' + key + '-std');
+
+      if (minEl) minEl.textContent = stats.min === Infinity ? '--' : stats.min.toFixed(1);
+      if (maxEl) maxEl.textContent = stats.max === -Infinity ? '--' : stats.max.toFixed(1);
+      if (avgEl) avgEl.textContent = stats.mean.toFixed(1);
+      if (stdEl) stdEl.textContent = stats.stddev.toFixed(2);
+    });
   }
 
   function initControls() {
@@ -220,6 +261,16 @@ const App = (() => {
       csv += time + ',' + temp + ',' + press + ',' + speed + ',' + vib + '\n';
     }
 
+    csv += '\nSENSÖR İSTATİSTİKLERİ\n';
+    csv += 'Sensör,Min,Max,Ortalama,Std Sapma,UCL,LCL,Ölçüm Sayısı\n';
+    ['temperature', 'pressure', 'speed', 'vibration'].forEach(key => {
+      const stats = SensorSimulator.getStatistics(key);
+      const config = SensorSimulator.getConfigs()[key];
+      csv += config.name + ',' + stats.min.toFixed(2) + ',' + stats.max.toFixed(2) + ',' +
+        stats.mean.toFixed(2) + ',' + stats.stddev.toFixed(2) + ',' +
+        stats.ucl.toFixed(2) + ',' + Math.max(0, stats.lcl).toFixed(2) + ',' + stats.count + '\n';
+    });
+
     csv += '\nÜRETİM VERİLERİ\n';
     csv += 'Toplam Üretim,Sağlam,Hatalı,Fire Oranı\n';
     csv += prodData.total + ',' + prodData.good + ',' + prodData.defective + ',' + prodData.wasteRate.toFixed(1) + '%\n';
@@ -228,6 +279,12 @@ const App = (() => {
     csv += 'Zaman,Sensör,Seviye,Mesaj,Detay,Onaylı\n';
     alarmData.forEach(a => {
       csv += a.time + ',' + a.sensor + ',' + a.level + ',"' + a.message + '","' + a.detail + '",' + (a.acknowledged ? 'Evet' : 'Hayır') + '\n';
+    });
+
+    csv += '\nGÜVENLİK KİLİT DURUMU\n';
+    csv += 'ID,İsim,Durum,Öncelik\n';
+    InterlockManager.getStatus().forEach(il => {
+      csv += il.id + ',' + il.name + ',' + (il.active ? 'AKTİF' : 'HAZIR') + ',' + il.priority + '\n';
     });
 
     const BOM = '\uFEFF';

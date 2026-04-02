@@ -957,6 +957,121 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.tech-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+  padding: 0 24px var(--gap);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* PID Panel */
+.pid-panel { grid-column: 1 / 2; }
+.pid-container {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+.pid-status {
+  text-align: center;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 6px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+}
+.pid-status.stable { background: var(--accent-green-dim); color: var(--accent-green); border: 1px solid rgba(0, 255, 136, 0.3); }
+.pid-status.approaching { background: var(--accent-orange-dim); color: var(--accent-orange); border: 1px solid rgba(255, 159, 67, 0.3); }
+.pid-status.deviation { background: var(--accent-red-dim); color: var(--accent-red); border: 1px solid rgba(255, 71, 87, 0.3); animation: pulse-red 1s infinite; }
+
+.pid-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.pid-val-box {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px;
+  text-align: center;
+}
+.pid-lbl { font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
+.pid-val { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: var(--text-primary); font-weight: 700; }
+
+.pid-terms {
+  display: flex;
+  justify-content: space-around;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: rgba(0,0,0,0.2);
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.pid-params-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border-color);
+}
+.pid-param-row { display: flex; flex-direction: column; gap: 4px; }
+.pid-param-row label { font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+.pid-param-row .setting-input { width: 100%; font-size: 0.9rem; padding: 4px 8px; }
+
+/* SPC Panel */
+.spc-panel { grid-column: 2 / 3; }
+.spc-table-container { overflow-x: auto; }
+.spc-table { width: 100%; border-collapse: collapse; text-align: left; }
+.spc-table th { font-family: 'Rajdhani', sans-serif; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; padding: 10px 8px; border-bottom: 1px solid var(--border-color); }
+.spc-table td { font-family: 'Inter', sans-serif; font-size: 0.85rem; color: var(--text-primary); padding: 10px 8px; border-bottom: 1px solid rgba(148, 163, 184, 0.05); }
+.spc-table tr:last-child td { border-bottom: none; }
+
+/* Interlock Panel */
+.interlock-panel { grid-column: 1 / 2; }
+.interlock-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; }
+.il-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: rgba(15, 23, 42, 0.6); border-radius: var(--radius-sm); border-left: 3px solid var(--accent-green); }
+.il-ok { border-left-color: var(--accent-green); }
+.il-warning { border-left-color: var(--accent-orange); background: rgba(255, 159, 67, 0.05); }
+.il-critical { border-left-color: var(--accent-red); background: rgba(255, 71, 87, 0.1); animation: alarm-flash 1.5s infinite; }
+.il-status-col { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
+.il-status-text { font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; font-weight: 700; margin-top: 4px; }
+.il-info-col { flex: 1; }
+.il-id { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--accent-blue); margin-bottom: 2px; }
+.il-name { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
+.il-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+.il-time-col { font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; color: var(--text-secondary); }
+.il-reset-btn { padding: 4px 10px; font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; font-weight: 600; background: var(--accent-orange-dim); color: var(--accent-orange); border: 1px solid rgba(255, 159, 67, 0.4); border-radius: 4px; cursor: pointer; }
+.il-reset-btn:hover { background: rgba(255, 159, 67, 0.2); }
+.il-auto-tag { font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; padding: 2px 6px; background: rgba(148, 163, 184, 0.1); border-radius: 4px; color: var(--text-muted); }
+
+/* Comm Panel */
+.comm-panel { grid-column: 2 / 3; }
+.comm-list { display: flex; flex-direction: column; gap: 12px; max-height: 250px; overflow-y: auto; }
+.comm-channel { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; }
+.comm-ok { border-color: rgba(0, 255, 136, 0.3); }
+.comm-error { border-color: rgba(255, 71, 87, 0.4); animation: pulse-red 2s infinite; }
+.comm-header-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.comm-name { font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+.comm-protocol-badge { font-family: 'Inter', sans-serif; font-size: 0.65rem; padding: 2px 6px; background: var(--accent-blue-dim); color: var(--accent-blue); border-radius: 10px; border: 1px solid rgba(0, 212, 255, 0.3); }
+.comm-address { font-family: 'Orbitron', sans-serif; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 1px; }
+.comm-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; }
+.comm-metric { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.comm-metric-label { font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+.comm-metric-value { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; color: var(--text-secondary); }
+.lat-low { color: var(--accent-green); }
+.lat-med { color: var(--accent-orange); }
+.lat-high { color: var(--accent-red); }
+
 @media (max-width: 1200px) {
   .dashboard {
     grid-template-columns: 1fr;

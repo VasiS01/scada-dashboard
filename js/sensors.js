@@ -85,6 +85,7 @@ const SensorSimulator = (() => {
         trend: 0,
         history: [],
         status: 'normal',
+        stats: { min: Infinity, max: -Infinity, sum: 0, count: 0, sumSq: 0 }
       };
     });
   }
@@ -127,6 +128,7 @@ const SensorSimulator = (() => {
 
         newValue = Math.max(config.min, Math.min(config.max, newValue));
         state.currentValue = newValue;
+        updateStats(key, newValue);
       }
 
       let status = 'normal';
@@ -179,6 +181,32 @@ const SensorSimulator = (() => {
     }
   }
 
+  function updateStats(key, value) {
+    const s = sensorStates[key].stats;
+    s.count++;
+    s.sum += value;
+    s.sumSq += value * value;
+    if (value < s.min) s.min = value;
+    if (value > s.max) s.max = value;
+  }
+
+  function getStatistics(key) {
+    const s = sensorStates[key]?.stats;
+    if (!s || s.count === 0) return { min: 0, max: 0, mean: 0, stddev: 0, count: 0 };
+    const mean = s.sum / s.count;
+    const variance = (s.sumSq / s.count) - (mean * mean);
+    const stddev = Math.sqrt(Math.max(0, variance));
+    return {
+      min: s.min,
+      max: s.max,
+      mean: mean,
+      stddev: stddev,
+      count: s.count,
+      ucl: mean + 3 * stddev,
+      lcl: mean - 3 * stddev
+    };
+  }
+
   function updateThresholds(sensorKey, thresholds) {
     const config = sensorConfigs[sensorKey];
     if (!config) return;
@@ -210,6 +238,7 @@ const SensorSimulator = (() => {
     update,
     getSensor,
     getConfigs,
+    getStatistics,
     updateThresholds,
     setPaused,
     isPaused,

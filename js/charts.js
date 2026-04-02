@@ -83,19 +83,51 @@ const ChartManager = (() => {
         type: 'line',
         data: {
           labels: [],
-          datasets: [{
-            label: config.label,
-            data: [],
-            borderColor: config.color,
-            backgroundColor: config.color.replace(')', ', 0.1)').replace('rgb', 'rgba').replace('#', ''),
-            borderWidth: 2,
-            pointRadius: 2,
-            pointHoverRadius: 6,
-            pointBackgroundColor: config.color,
-            pointHoverBackgroundColor: config.color,
-            tension: 0.3,
-            fill: true
-          }]
+          datasets: [
+            {
+              label: config.label,
+              data: [],
+              borderColor: config.color,
+              backgroundColor: config.color.replace(')', ', 0.1)').replace('rgb', 'rgba').replace('#', ''),
+              borderWidth: 2,
+              pointRadius: 2,
+              pointHoverRadius: 6,
+              pointBackgroundColor: config.color,
+              pointHoverBackgroundColor: config.color,
+              tension: 0.3,
+              fill: true
+            },
+            {
+              label: 'UCL (Üst Kontrol)',
+              data: [],
+              borderColor: 'rgba(255, 71, 87, 0.6)',
+              borderWidth: 1,
+              borderDash: [6, 4],
+              pointRadius: 0,
+              fill: false,
+              tension: 0
+            },
+            {
+              label: 'X̄ (Ortalama)',
+              data: [],
+              borderColor: 'rgba(255, 211, 42, 0.5)',
+              borderWidth: 1,
+              borderDash: [4, 4],
+              pointRadius: 0,
+              fill: false,
+              tension: 0
+            },
+            {
+              label: 'LCL (Alt Kontrol)',
+              data: [],
+              borderColor: 'rgba(255, 71, 87, 0.6)',
+              borderWidth: 1,
+              borderDash: [6, 4],
+              pointRadius: 0,
+              fill: false,
+              tension: 0
+            }
+          ]
         },
         options: createChartOptions(config)
       });
@@ -146,9 +178,22 @@ const ChartManager = (() => {
       chart.data.labels.push(now);
       chart.data.datasets[0].data.push(value);
 
+      if (typeof SensorSimulator !== 'undefined' && SensorSimulator.getStatistics) {
+        const stats = SensorSimulator.getStatistics(key);
+        if (stats.count > 5) {
+          chart.data.datasets[1].data.push(stats.ucl);
+          chart.data.datasets[2].data.push(stats.mean);
+          chart.data.datasets[3].data.push(Math.max(0, stats.lcl));
+        } else {
+          chart.data.datasets[1].data.push(null);
+          chart.data.datasets[2].data.push(null);
+          chart.data.datasets[3].data.push(null);
+        }
+      }
+
       if (chart.data.labels.length > MAX_POINTS) {
         chart.data.labels.shift();
-        chart.data.datasets[0].data.shift();
+        chart.data.datasets.forEach(ds => ds.data.shift());
       }
 
       chart.update('none');
