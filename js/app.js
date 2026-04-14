@@ -316,12 +316,37 @@ const App = (() => {
     URL.revokeObjectURL(url);
   }
 
+  const previousValues = {};
+
   function updateSensorCard(key, data) {
     const valueEl = document.getElementById('sensor-' + key + '-value');
     const barEl = document.getElementById('sensor-' + key + '-bar');
     const dotEl = document.getElementById('sensor-' + key + '-dot');
     const cardEl = document.getElementById('sensor-' + key + '-card');
-    if (valueEl) valueEl.textContent = data.displayValue;
+
+    if (valueEl) {
+      const newVal = parseFloat(data.displayValue);
+      const oldVal = previousValues[key] !== undefined ? previousValues[key] : newVal;
+      previousValues[key] = newVal;
+
+      if (Math.abs(newVal - oldVal) > 0.01) {
+        animateValue(valueEl, oldVal, newVal, 400, key);
+      } else {
+        valueEl.textContent = data.displayValue;
+      }
+
+      if (data.status === 'critical') {
+        valueEl.style.color = '#ff4757';
+        valueEl.style.textShadow = '0 0 20px rgba(255, 71, 87, 0.4)';
+      } else if (data.status === 'warning') {
+        valueEl.style.color = '#ff9f43';
+        valueEl.style.textShadow = '0 0 20px rgba(255, 159, 67, 0.3)';
+      } else {
+        valueEl.style.color = '';
+        valueEl.style.textShadow = '0 0 20px rgba(226, 232, 240, 0.1)';
+      }
+    }
+
     if (barEl) {
       barEl.style.width = Math.min(100, Math.max(0, data.percentage)) + '%';
       barEl.style.background = data.status === 'critical' ? '#ff4757'
@@ -333,6 +358,29 @@ const App = (() => {
     if (cardEl) {
       cardEl.classList.toggle('alarm', data.status === 'critical');
     }
+  }
+
+  function animateValue(el, from, to, duration, sensorKey) {
+    const startTime = performance.now();
+    const decimals = sensorKey === 'speed' ? 0 : sensorKey === 'pressure' || sensorKey === 'vibration' ? 2 : 1;
+
+    function step(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = from + (to - from) * eased;
+
+      if (decimals === 0) {
+        el.textContent = Math.round(current).toString();
+      } else {
+        el.textContent = current.toFixed(decimals);
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    }
+    requestAnimationFrame(step);
   }
 
   function updateStations(sensorData) {

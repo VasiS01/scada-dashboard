@@ -83,19 +83,35 @@ const EnergyMonitor = (() => {
     const range = max - min || 1;
 
     let points = '';
+    let lastX = 0;
+    let lastY = 0;
     data.forEach((val, i) => {
       const x = (i / (data.length - 1)) * w;
-      const y = h - ((val - min) / range) * (h - 4) - 2;
+      const y = h - ((val - min) / range) * (h - 6) - 3;
       points += x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+      lastX = x;
+      lastY = y;
     });
 
+    const avgPower = data.reduce((a, b) => a + b, 0) / data.length;
+    const strokeColor = avgPower > 70 ? '#ff4757' : avgPower > 50 ? '#ff9f43' : '#00d4ff';
+    const gradStart = avgPower > 70 ? 'rgba(255,71,87,0.35)' : avgPower > 50 ? 'rgba(255,159,67,0.3)' : 'rgba(0,212,255,0.3)';
+    const gradEnd = avgPower > 70 ? 'rgba(255,71,87,0)' : avgPower > 50 ? 'rgba(255,159,67,0)' : 'rgba(0,212,255,0)';
+
     container.innerHTML = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
-      '<defs><linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0%" stop-color="rgba(0,212,255,0.3)"/>' +
-      '<stop offset="100%" stop-color="rgba(0,212,255,0)"/>' +
-      '</linearGradient></defs>' +
-      '<polyline points="' + points.trim() + '" fill="none" stroke="#00d4ff" stroke-width="1.5" stroke-linejoin="round"/>' +
+      '<defs>' +
+      '<linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="' + gradStart + '"/>' +
+      '<stop offset="100%" stop-color="' + gradEnd + '"/>' +
+      '</linearGradient>' +
+      '<filter id="sparkGlow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+      '</defs>' +
       '<polygon points="0,' + h + ' ' + points.trim() + ' ' + w + ',' + h + '" fill="url(#sparkGrad)"/>' +
+      '<polyline points="' + points.trim() + '" fill="none" stroke="' + strokeColor + '" stroke-width="1.5" stroke-linejoin="round" filter="url(#sparkGlow)"/>' +
+      '<circle cx="' + lastX.toFixed(1) + '" cy="' + lastY.toFixed(1) + '" r="3" fill="' + strokeColor + '" opacity="0.9">' +
+      '<animate attributeName="r" values="3;5;3" dur="1.5s" repeatCount="indefinite"/>' +
+      '<animate attributeName="opacity" values="0.9;0.4;0.9" dur="1.5s" repeatCount="indefinite"/>' +
+      '</circle>' +
       '</svg>';
   }
 

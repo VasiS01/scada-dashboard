@@ -83,8 +83,12 @@ const AlarmManager = (() => {
     }
 
     if (filtered.length === 0) {
-      const msg = currentFilter === 'all' ? '✅ Aktif alarm bulunmuyor' : '📋 Bu kategoride alarm yok';
-      alarmContainer.innerHTML = '<div class="alarm-empty">' + msg + '</div>';
+      const isFiltered = currentFilter !== 'all';
+      if (isFiltered) {
+        alarmContainer.innerHTML = '<div class="alarm-empty"><span class="alarm-empty-icon">📋</span><div class="alarm-empty-title">Kayıt Yok</div><div class="alarm-empty-sub">Bu kategoride alarm bulunmuyor</div></div>';
+      } else {
+        alarmContainer.innerHTML = '<div class="alarm-empty"><span class="alarm-empty-icon">🛡️</span><div class="alarm-empty-title">Sistem Normal</div><div class="alarm-empty-sub">Tüm sensörler güvenli aralıkta çalışıyor</div></div>';
+      }
     } else {
       alarmContainer.innerHTML = filtered.map(a => {
         const icon = a.level === 'critical' ? '🔴' : a.level === 'warning' ? '🟠' : '🔵';
