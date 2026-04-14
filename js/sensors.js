@@ -9,14 +9,14 @@ const SensorSimulator = (() => {
       min: 0,
       max: 150,
       normalMin: 40,
-      normalMax: 85,
-      warningMin: 30,
-      warningMax: 100,
-      criticalMin: 15,
-      criticalMax: 120,
+      normalMax: 90,
+      warningMin: 25,
+      warningMax: 105,
+      criticalMin: 10,
+      criticalMax: 130,
       baseValue: 65,
-      noiseLevel: 3,
-      driftSpeed: 0.5,
+      noiseLevel: 1.5,
+      driftSpeed: 0.3,
     },
     pressure: {
       id: 'pressure',
@@ -28,13 +28,13 @@ const SensorSimulator = (() => {
       max: 10,
       normalMin: 3,
       normalMax: 7,
-      warningMin: 2,
-      warningMax: 8,
-      criticalMin: 1,
+      warningMin: 1.5,
+      warningMax: 8.5,
+      criticalMin: 0.5,
       criticalMax: 9.5,
       baseValue: 5,
-      noiseLevel: 0.3,
-      driftSpeed: 0.1,
+      noiseLevel: 0.15,
+      driftSpeed: 0.06,
     },
     speed: {
       id: 'speed',
@@ -46,13 +46,13 @@ const SensorSimulator = (() => {
       max: 3000,
       normalMin: 800,
       normalMax: 1800,
-      warningMin: 500,
-      warningMax: 2200,
-      criticalMin: 200,
-      criticalMax: 2800,
+      warningMin: 400,
+      warningMax: 2300,
+      criticalMin: 150,
+      criticalMax: 2850,
       baseValue: 1200,
-      noiseLevel: 50,
-      driftSpeed: 20,
+      noiseLevel: 25,
+      driftSpeed: 10,
     },
     vibration: {
       id: 'vibration',
@@ -63,14 +63,14 @@ const SensorSimulator = (() => {
       min: 0,
       max: 20,
       normalMin: 0,
-      normalMax: 4.5,
+      normalMax: 5,
       warningMin: 0,
-      warningMax: 7,
+      warningMax: 8,
       criticalMin: 0,
-      criticalMax: 11,
+      criticalMax: 12,
       baseValue: 2.5,
-      noiseLevel: 0.5,
-      driftSpeed: 0.2,
+      noiseLevel: 0.25,
+      driftSpeed: 0.1,
     },
   };
 
@@ -114,15 +114,15 @@ const SensorSimulator = (() => {
       const state = sensorStates[key];
 
       if (!paused) {
-        state.trend += gaussianRandom(0, config.driftSpeed * 0.3);
-        state.trend = Math.max(-config.driftSpeed * 2, Math.min(config.driftSpeed * 2, state.trend));
+        state.trend += gaussianRandom(0, config.driftSpeed * 0.2);
+        state.trend = Math.max(-config.driftSpeed * 1.5, Math.min(config.driftSpeed * 1.5, state.trend));
         const noise = gaussianRandom(0, config.noiseLevel);
         let newValue = state.currentValue + state.trend + noise;
-        const pullForce = (config.baseValue - newValue) * 0.02;
+        const pullForce = (config.baseValue - newValue) * 0.05;
         newValue += pullForce;
 
-        if (Math.random() < 0.02) {
-          const spike = gaussianRandom(0, config.noiseLevel * 5);
+        if (Math.random() < 0.005) {
+          const spike = gaussianRandom(0, config.noiseLevel * 3);
           newValue += spike;
         }
 

@@ -3,6 +3,8 @@ const App = (() => {
   const UPDATE_RATE = 2000;
   let isRunning = true;
   let isEmergency = false;
+  let startTime = Date.now();
+  let dataPointCount = 0;
 
   function init() {
     SensorSimulator.init();
@@ -13,6 +15,8 @@ const App = (() => {
     PIDController.init();
     InterlockManager.init();
     CommSimulator.init();
+    EnergyMonitor.init();
+    DataDrawer.init();
     startClock();
     updateShift();
     startSimulation();
@@ -20,6 +24,7 @@ const App = (() => {
     initControls();
     initSettingsModal();
     initCSVExport();
+    startFooterUptime();
   }
 
   function startClock() {
@@ -86,6 +91,12 @@ const App = (() => {
       });
 
       CommSimulator.update(sensorData);
+
+      EnergyMonitor.update(sensorData);
+      DataDrawer.addData(sensorData);
+
+      dataPointCount++;
+      updateFooterInfo();
 
       updateStations(sensorData);
       updateSystemStatus(sensorData);
@@ -371,6 +382,35 @@ const App = (() => {
     document.querySelectorAll('.station-box').forEach(el => {
       el.style.cursor = 'pointer';
     });
+  }
+
+  function startFooterUptime() {
+    function updateUptime() {
+      const elapsed = Date.now() - startTime;
+      const hours = Math.floor(elapsed / 3600000);
+      const minutes = Math.floor((elapsed % 3600000) / 60000);
+      const seconds = Math.floor((elapsed % 60000) / 1000);
+      const uptimeEl = document.getElementById('footer-uptime');
+      if (uptimeEl) {
+        uptimeEl.textContent =
+          String(hours).padStart(2, '0') + ':' +
+          String(minutes).padStart(2, '0') + ':' +
+          String(seconds).padStart(2, '0');
+      }
+    }
+    updateUptime();
+    setInterval(updateUptime, 1000);
+  }
+
+  function updateFooterInfo() {
+    const dpEl = document.getElementById('footer-datapoints');
+    const lastEl = document.getElementById('footer-last-update');
+    if (dpEl) dpEl.textContent = dataPointCount.toLocaleString('tr-TR');
+    if (lastEl) {
+      lastEl.textContent = new Date().toLocaleTimeString('tr-TR', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+    }
   }
 
   document.addEventListener('DOMContentLoaded', init);
