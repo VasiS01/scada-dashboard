@@ -232,6 +232,12 @@ const App = (() => {
     if (btn) {
       btn.addEventListener('click', exportCSV);
     }
+    const pdfBtn = document.getElementById('btn-export-pdf');
+    if (pdfBtn) {
+      pdfBtn.addEventListener('click', function() {
+        PDFReport.generate();
+      });
+    }
   }
 
   function exportCSV() {

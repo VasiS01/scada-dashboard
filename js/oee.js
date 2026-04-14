@@ -58,5 +58,13 @@ const OEEManager = (() => {
     if (value >= 70) return '#ff9f43';
     return '#ff4757';
   }
-  return { init, update };
+  function getData() {
+    return {
+      availability: availability,
+      performance: performance,
+      quality: quality,
+      oee: (availability * performance * quality) / 10000
+    };
+  }
+  return { init, update, getData };
 })();

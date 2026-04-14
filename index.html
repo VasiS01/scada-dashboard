@@ -7,6 +7,8 @@
   <title>SCADA Dashboard — Üretim Hattı İzleme Paneli</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -156,7 +158,10 @@
     <section class="card production-panel">
       <div class="card-header">
         <div class="card-title"><span class="icon">📦</span> Üretim Sayacı</div>
-        <button id="btn-export-csv" class="export-btn" title="CSV Olarak İndir">📥 CSV İndir</button>
+        <div class="export-buttons">
+          <button id="btn-export-csv" class="export-btn" title="CSV Olarak İndir">📥 CSV</button>
+          <button id="btn-export-pdf" class="export-btn export-btn-pdf" title="PDF Rapor İndir">📄 PDF Rapor</button>
+        </div>
       </div>
       <div class="production-grid">
         <div class="production-stat">
@@ -483,6 +488,7 @@
   <script src="js/pid.js"></script>
   <script src="js/interlock.js"></script>
   <script src="js/comm.js"></script>
+  <script src="js/pdf-report.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

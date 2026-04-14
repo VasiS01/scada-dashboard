@@ -342,6 +342,19 @@ body {
   background: rgba(0, 212, 255, 0.25);
   box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
 }
+.export-buttons {
+  display: flex;
+  gap: 6px;
+}
+.export-btn-pdf {
+  border-color: rgba(168, 85, 247, 0.3);
+  background: rgba(168, 85, 247, 0.15);
+  color: var(--accent-purple);
+}
+.export-btn-pdf:hover {
+  background: rgba(168, 85, 247, 0.25);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
+}
 
 .factory-layout {
   grid-column: 1 / 2;
